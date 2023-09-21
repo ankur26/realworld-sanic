@@ -21,12 +21,12 @@ For more information on how to this works with other frontends/backends, head ov
 
 1. Clone the repo
 2. Create a virtual environemnt using venv, virtualenv inside the repo directory
-<code>
-python -m venv .venv
-</code>
+> python -m venv .venv
+
 3. Activate the virtual enviroment in 
-    1. Windows - using `./.venv/Scripts/activate`
-    2. Linus - using `source .venv/bin/activate` 
+    - Windows - using `./.venv/Scripts/activate`
+    - Linux - using `source .venv/bin/activate`
+
 4. Install the required dependencies using `pip install -r requirements.txt`
 5. Launch the app locally using `sanic server:create_app --factory (--dev:optional)`
 
