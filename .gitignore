@@ -3,7 +3,9 @@
 # dependencies
 /node_modules
 /dist
-
+/__pycache__
+/.venv
+*/__pycache__/
 # IDEs and editors
 /.idea
 .project
@@ -25,7 +27,7 @@
 #System Files
 .DS_Store
 Thumbs.db
-
+conduit.db
 
 #log files
 npm-debug.log*
