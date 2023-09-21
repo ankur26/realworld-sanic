@@ -6,7 +6,7 @@
 ### [Demo](https://demo.realworld.io/)&nbsp;&nbsp;&nbsp;&nbsp;[RealWorld](https://github.com/gothinkster/realworld) (Work in progress, these are the original links)
 
 
-This codebase was created to demonstrate a fully fledged fullstack application built with **Sanic** including CRUD operations, authentication, routing, pagination, and more.
+This codebase was created to demonstrate a backend API built with **Sanic** including CRUD operations, authentication, routing, pagination, and more.
 
 We've gone to great lengths to adhere to the **Sanic** community styleguides & best practices.
 
@@ -15,7 +15,7 @@ For more information on how to this works with other frontends/backends, head ov
 
 # How it works
 
-> Describe the general architecture of your app here
+> Describe the general architecture of your app here ( Work in progress )
 
 # Getting started
 
