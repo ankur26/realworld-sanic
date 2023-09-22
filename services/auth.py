@@ -14,7 +14,7 @@ from peewee import PeeweeException
 auth_bp = Blueprint("auth", url_prefix="/users")
 
 
-@auth_bp.post("/")
+@auth_bp.post("/",name="register")
 @validate_request_body_exists
 @validate_request_object_exists_in_body("user")
 @validate_data(UserRegistration, "user")
@@ -42,14 +42,14 @@ async def register(request, validated_data: UserRegistration):
     # return text("You are the register route")
 
 
-@auth_bp.get("/")
-@validate_authorization_token_exists
-@authorize
+@auth_bp.get("/",name="get_user")
+@validate_authorization_token_exists()
+@authorize()
 async def get_user(request):
     return json(await serialize_output(UserOutput, request.ctx.user, "user"))
 
 
-@auth_bp.post("/login")
+@auth_bp.post("/login",name="login")
 @validate_request_body_exists
 @validate_request_object_exists_in_body("user")
 @validate_data(UserLogin, "user")
@@ -73,22 +73,23 @@ async def login(request, validated_data: UserLogin):
         }, 422)
 
 
-@auth_bp.put("/")
+@auth_bp.put("/",name="update_user")
 @validate_request_body_exists
 @validate_request_object_exists_in_body("user")
-@authorize
+@validate_authorization_token_exists()
+@authorize()
 @validate_data(UserUpdate, "user")
 async def update_user(request, validated_data: UserUpdate):
     # Get the user id which was set inside the context by the authorization
     # And set it inside our validated model
-    updated_user = await merge_objects(dict(**request.ctx.user), dict(validated_data))
+    updated_user = await merge_objects(request.ctx.user, dict(validated_data))
     user_cursor = dict_to_model(User, updated_user, ignore_unknown=True)
     try:
         user_cursor.save()
         output_data = model_to_dict(user_cursor, exclude=["password"])
         status, output_data["token"] = await get_token(output_data)
         if status:
-            return await(serialize_output(UserOutput, output_data, "user"))
+            return json(await serialize_output(UserOutput, output_data, "user"))
         else:
             return json({"error": "Something went wrong"}, 500)
     except PeeweeException as pe:
