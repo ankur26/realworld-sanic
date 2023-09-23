@@ -1,6 +1,6 @@
+from peewee import ForeignKeyField
 from .Base import BaseModel
 from .User import User
-from peewee import ForeignKeyField
 
 
 class Followers(BaseModel):
