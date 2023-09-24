@@ -1,4 +1,4 @@
-from sanic import Blueprint, json
+from sanic import Blueprint, json, SanicException
 from middleware.requestcontentvalidator import validate_data
 from middleware.requestvalidator import validate_request_body_exists, validate_request_object_exists_in_body, validate_authorization_token_exists, authorize
 from helpers.serializer_helper import serialize_output, merge_objects
@@ -10,11 +10,10 @@ from helpers.jwt_token_helper import get_token
 from peewee import PeeweeException
 
 
-
 auth_bp = Blueprint("auth", url_prefix="/users")
 
 
-@auth_bp.post("/",name="register")
+@auth_bp.post("/", name="register")
 @validate_request_body_exists
 @validate_request_object_exists_in_body("user")
 @validate_data(UserRegistration, "user")
@@ -42,14 +41,14 @@ async def register(request, validated_data: UserRegistration):
     # return text("You are the register route")
 
 
-@auth_bp.get("/",name="get_user")
+@auth_bp.get("/", name="get_user")
 @validate_authorization_token_exists()
 @authorize()
 async def get_user(request):
-    return json(await serialize_output(UserOutput, request.ctx.user, "user"))
+    return json(await serialize_output(UserOutput, request.ctx.user, "user")) if request.ctx.user else SanicException("Something is wrong",500)
 
 
-@auth_bp.post("/login",name="login")
+@auth_bp.post("/login", name="login")
 @validate_request_body_exists
 @validate_request_object_exists_in_body("user")
 @validate_data(UserLogin, "user")
@@ -66,14 +65,14 @@ async def login(request, validated_data: UserLogin):
         else:
             return json({
                 "errors": "Password does not match"
-            })
+            },403)
     else:
         return json({
             "error": "username does not exist"
         }, 422)
 
 
-@auth_bp.put("/",name="update_user")
+@auth_bp.put("/", name="update_user")
 @validate_request_body_exists
 @validate_request_object_exists_in_body("user")
 @validate_authorization_token_exists()
@@ -83,6 +82,10 @@ async def update_user(request, validated_data: UserUpdate):
     # Get the user id which was set inside the context by the authorization
     # And set it inside our validated model
     updated_user = await merge_objects(request.ctx.user, dict(validated_data))
+    if "password" in updated_user:
+        # password needs to encrypted and then changed
+        updated_user["password"] = hashpw(
+            bytes(updated_user["password"], encoding="utf-8"), gensalt())
     user_cursor = dict_to_model(User, updated_user, ignore_unknown=True)
     try:
         user_cursor.save()
@@ -93,6 +96,6 @@ async def update_user(request, validated_data: UserUpdate):
         else:
             return json({"error": "Something went wrong"}, 500)
     except PeeweeException as pe:
-        return json({"errors":pe},422)
+        return json({"errors": pe}, 422)
     except Exception as e:
         return json({"errors": e}, 500)

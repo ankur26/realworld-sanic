@@ -39,23 +39,23 @@ def validate_request_object_exists_in_body(key):
     
 
 
-def validate_authorization_token_exists(allow_anonymous_context=False):
+def validate_authorization_token_exists(allow_anonymous=False):
     def dec(func):
         @wraps(func)
         async def wrapper(request, *args,**kwargs):
-            if allow_anonymous_context:
-                res = await func(request,*args,**kwargs)
-                return res
+            # if allow_anonymous_context:
+            #     res = await func(request,*args,**kwargs)
+            #     return res
             
             auth_header = request.headers.get("Authorization",None)
             # print(auth_header)
-            if not auth_header:
+            if not auth_header and not allow_anonymous:
                 return json({
                     "errors":{
                         "headers":"Missing Bearer token"
                     }
                 },403)
-            if not auth_header.startswith("Bearer ") and not auth_header.startswith("Token "):
+            if not auth_header.startswith("Bearer ") and not auth_header.startswith("Token ") and not allow_anonymous:
                 return json({
                     "errors":{
                         "header":"Authorization missing bearer or token prefix"
@@ -66,28 +66,25 @@ def validate_authorization_token_exists(allow_anonymous_context=False):
         return wrapper
     return dec
 
-
-def authorize(allow_anonymous_context=False):
+def authorize():
     def decorator(func):
         @wraps(func)
         async def wrapper(request,*args,**kwargs):
-            if allow_anonymous_context:
-                request.ctx.user = None
-                res = await func(request,*args,**kwargs)
-                return res
-            bearer_token = request.headers.get("Authorization").replace("Bearer ","").replace("Token ","")
-            token_check_output = await check_token_and_return_status(bearer_token)
-            if token_check_output["valid_token"]:
-                user = token_check_output["token_user"]
-                user["token"] = bearer_token
-                request.ctx.user = user
-                res = await func(request,*args,**kwargs)
-                return res
-            else:
-                return json({
-                    "error":token_check_output["error"]
-                },token_check_output["return_status_code"])
-
+            bearer_token = request.headers.get("Authorization",None)
+            if bearer_token:
+                bearer_token = bearer_token.replace("Bearer ","").replace("Token ","")
+                token_check_output = await check_token_and_return_status(bearer_token)
+                if token_check_output["valid_token"]:
+                    user = token_check_output["token_user"]
+                    user["token"] = bearer_token
+                    request.ctx.user = user
+                else:
+                    return json({
+                        "error":token_check_output["error"]
+                    },token_check_output["return_status_code"])
+            elif not bearer_token:
+                request.ctx.user = None            
+            res= await func(request,*args,**kwargs)
+            return res
         return wrapper
     return decorator
-

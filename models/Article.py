@@ -1,4 +1,4 @@
-from peewee import CharField,TextField,ForeignKeyField,DateTimeField
+from peewee import CharField,TextField,ForeignKeyField
 from datetime import datetime
 
 from .Base import BaseModel
@@ -9,5 +9,5 @@ class Article(BaseModel):
     description=CharField()
     body=TextField()
     author = ForeignKeyField(User,field="id")
-    createdAt = DateTimeField(default = datetime.now)
-    updatedAt = DateTimeField(default = datetime.now)
+    createdAt = CharField(default = datetime.now().isoformat())
+    updatedAt = CharField(default = datetime.now().isoformat())
