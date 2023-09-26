@@ -5,6 +5,7 @@ from .Base import BaseModel
 from .User import User
 
 class Article(BaseModel):
+    slug=CharField()
     title=CharField()
     description=CharField()
     body=TextField()

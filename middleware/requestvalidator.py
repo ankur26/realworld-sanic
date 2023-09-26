@@ -49,19 +49,24 @@ def validate_authorization_token_exists(allow_anonymous=False):
             
             auth_header = request.headers.get("Authorization",None)
             # print(auth_header)
-            if not auth_header and not allow_anonymous:
-                return json({
-                    "errors":{
-                        "headers":"Missing Bearer token"
-                    }
-                },403)
-            if not auth_header.startswith("Bearer ") and not auth_header.startswith("Token ") and not allow_anonymous:
-                return json({
+            if auth_header:
+                if not auth_header.startswith("Bearer ") and not auth_header.startswith("Token "):
+                    return json({
                     "errors":{
                         "header":"Authorization missing bearer or token prefix"
                     }
                 },403)
-            res = await func(request,*args,**kwargs)
+                res = await func(request,*args,**kwargs)
+            else:
+                if allow_anonymous:
+                    res = await func(request,*args,**kwargs)
+                else:
+                    return json({
+                    "errors":{
+                        "headers":"Missing Bearer token"
+                    }
+                },403)
+            # res = await func(request,*args,**kwargs)
             return res
         return wrapper
     return dec
