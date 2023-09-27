@@ -1,15 +1,14 @@
 from sanic import Blueprint,SanicException,json
-from models.Followers import Followers
 from models.Article import Article
 from models.Tags import Tags
-from models.User import User
 from models.TagToArticle import TagToArticle
 from models.FavoritedArticlesByUser import FavoritedArticlesByUser
-from helpers.serializer_helper import serialize_output
+from helpers.serializer_helper import serialize_output,serialize_multiple,get_query_items,merge_objects
 from middleware.requestcontentvalidator import validate_data
 from middleware.requestvalidator import validate_request_body_exists,validate_request_object_exists_in_body,validate_authorization_token_exists,authorize
-from schemas.ArticleValidationAndSerializationSchema import ArticleCreateType,ArticleOutputType
+from schemas.ArticleValidationAndSerializationSchema import ArticleCreateType,ArticleOutputType,ArticleUpdateType
 from playhouse.shortcuts import dict_to_model, model_to_dict
+from helpers.articlefetchelper import get_articles_from_helper,get_single_article
 from peewee import IntegrityError
 
 
@@ -28,7 +27,6 @@ async def create_article(request,validated_data:ArticleCreateType):
     validated_data = validated_data.model_dump()
     validated_data["author"] = current_user["id"]
     article_cursor = dict_to_model(Article,validated_data,ignore_unknown=True)
-    print("Reached the created cursor point as wel")
     try:
         #We need to create and article first, the tags then can be associated with 
         #Whose ID can be then be passed for us to create tags.
@@ -46,12 +44,7 @@ async def create_article(request,validated_data:ArticleCreateType):
                 if not tag_to_article_id:
                     print("Some error happened")
                 #We now have a tag list, we now have a article entry
-            article_output = model_to_dict(article_cursor)
-            article_output["tagList"] = taglist
-            article_output["author"] = current_user
-            article_output["author"]["following"] = False
-            print("Reacehed till this point")
-            # print(article_output)
+            article_output = await get_single_article(user=current_user,article_id=article_id)   
             return json(await serialize_output(ArticleOutputType,article_output,"article"))
     except IntegrityError as e:
         print (e)
@@ -66,36 +59,116 @@ async def create_article(request,validated_data:ArticleCreateType):
 @authorize()
 async def get_article(request,slug):
     user = request.ctx.user
-    try:
-
-        article = model_to_dict(Article.get(Article.slug == slug))
-        print(article)
-        if article:
-            # article_output = model_to_dict(article)
-            article["favorited"] = FavoritedArticlesByUser.get_or_none(userid=user["id"],articleid=article['id']) is not None if user else False
-            article["favoritesCount"] = FavoritedArticlesByUser.select(FavoritedArticlesByUser.articleid== article["id"]).count()
-            # tag_predicate= TagToArticle.select(TagToArticle.articleid == article["id"] )
-            tags = TagToArticle.select().join(
-                Tags,on=(Tags.id==TagToArticle.tagid)).join(
-                    Article, on=(Article.id==TagToArticle.articleid)).where(
-                        Article.id==article["id"])
-            article["tagList"] = [tag.tagid.tag for tag in tags]
-            article["author"]["following"] = False if not user else Followers.get_or_none(userid=user.id,following=article["author"]["id"]) is not None
-            return json(await serialize_output(ArticleOutputType,article,"article"))
-    except IntegrityError as ie:
-        print(ie)
-        raise SanicException("There has been an an internal server error",500)
-    except Exception as e:
-        print(e)
-        raise SanicException("Non database issue",500)
+    article = await get_single_article(user,article_slug=slug)
+    return json(await serialize_output(ArticleOutputType,article,"article"))
 
 @article_bp.get("/",name="get_articles")
+@validate_authorization_token_exists(allow_anonymous=True)
+@authorize()
 async def get_articles(request):
-    return json(["Get articles soon here."])
+    query_dict =await get_query_items(request.query_args)
+    user = request.ctx.user
+    results = await get_articles_from_helper(
+        limit=query_dict.get('limit',20),
+        offset=query_dict.get('offset',0),
+        author=query_dict.get('author',None),
+        tag=query_dict.get('tag',None),
+        favorite=query_dict.get('favorited',None),
+        user=user,
+        single=False
+        )
+    results = await serialize_multiple(ArticleOutputType,results,"article")
+    
+    return json(results)
 
 @article_bp.get("/feed",name="get_feed")
 @validate_authorization_token_exists()
 @authorize()
 async def get_feed(request):
-    return json(["Get feed"])
+    query_dict =await get_query_items(request.query_args)
+    user = request.ctx.user
+    results = await get_articles_from_helper(
+        limit=query_dict.get('limit',20),
+        offset=query_dict.get('offset',0),
+        author=query_dict.get('author',None),
+        tag=query_dict.get('tag',None),
+        favorite=query_dict.get('favorited',None),
+        user=user,
+        single=False
+        )
+    results = await serialize_multiple(ArticleOutputType,results,"article")
+    return json(results)
 
+
+@article_bp.post("/<slug:str>/favorite",name="toggle_favorite")
+@article_bp.delete("/<slug:str>/favorite",name="untoggle_favorite")
+@validate_authorization_token_exists()
+@authorize()
+async def toggle_favorite(request,slug):
+    user = request.ctx.user
+    article_id = Article.get_or_none(slug=slug)
+    # print(user,article_id)
+    if article_id and user:
+        if request.method == "POST":
+            id = FavoritedArticlesByUser.get_or_create(articleid = article_id,userid = user["id"])
+            return json(await serialize_output(ArticleOutputType,await get_single_article(user=user,article_id=article_id),"article"))
+        elif request.method == "DELETE":
+            favorite = FavoritedArticlesByUser.get_or_none(articleid=article_id,userid=user["id"])
+            FavoritedArticlesByUser.delete_by_id(favorite)
+            return json(await serialize_output(ArticleOutputType,await get_single_article(user=user,article_id=article_id),"article"))
+    else:
+        raise SanicException("Slug not found not found",404)
+    
+
+@article_bp.put("/<slug:str>",name="update_article")
+@validate_request_body_exists
+@validate_request_object_exists_in_body("article")
+@validate_authorization_token_exists()
+@authorize()
+@validate_data(ArticleUpdateType, "article",)
+async def update_article(request,validated_data:ArticleUpdateType,slug):
+    user = request.ctx.user
+    article = Article.get(slug=slug)
+    original = model_to_dict(article,exclude=["author"])
+    if original["author"]["id"] != user["id"]:
+        return json(
+            {"errors":"You don't have permission to edit this article"},403
+        )
+    del original["author"] #Extra measure
+    # print(dict(validated_data))
+    article_cursor = dict_to_model(Article,await merge_objects(dict(validated_data),original),ignore_unknown=True)
+    article_cursor.save()
+    # print(updated_object)
+    # The assumption with a tagList is that it will always be a fresh update
+    # The reason is that an update is always done on top of the original list
+
+    #Get the original tag list
+    tags_for_article = TagToArticle.select(Tags).join(Tags,on=(Tags.id == TagToArticle.tagid)).where(TagToArticle.articleid ==article.id).dicts()
+    original_tags = [row["tag"] for row in tags_for_article]
+    article
+    tags_to_be_added = [tag for tag in original_tags if tag in validated_data.tagList]
+    tags_to_be_removed = [tag for tag in original_tags if tag not in validated_data.tagList]
+    try:
+        # Ensure that our tags are now updated
+        for tag in tags_to_be_removed:
+            tid = Tags.get_or_none(tag=tag)
+            toaid = TagToArticle.get_or_none(articleid=original["id"],tagid=tid)
+            if toaid:
+                TagToArticle.delete_by_id(toaid)
+        for tag in tags_to_be_added:
+            tid = Tags.get_or_none(tag=tag)
+            if not tid:
+                tid = Tags(tag=tag).save()
+            toaid = TagToArticle.get_or_none(articleid=original["id"],tagid=tid)
+            if not toaid:
+                toaid = TagToArticle(articleid=original["id"],tagid=tid)
+                toaid.save()
+            
+
+        # Update the article now
+
+        return json(await serialize_output(ArticleOutputType,await get_single_article(user,article_id=original["id"]),"article"))
+    except IntegrityError as e:
+        print(e)
+        return SanicException("internal server error",500)
+    

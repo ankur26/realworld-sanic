@@ -22,7 +22,7 @@ def validate_data(validator_class, object_entry: str):
                 try:
                     validated_data = validator_class(
                         **request.json.get(object_entry))
-                    res = await f(request, validated_data, *args, *kwargs)
+                    res = await f(request, validated_data, *args, **kwargs) 
                     return res
                 except ValidationError as ve:
                     print(ve.errors())

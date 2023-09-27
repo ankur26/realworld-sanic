@@ -81,8 +81,9 @@ async def login(request, validated_data: UserLogin):
 async def update_user(request, validated_data: UserUpdate):
     # Get the user id which was set inside the context by the authorization
     # And set it inside our validated model
-    updated_user = await merge_objects(request.ctx.user, dict(validated_data))
-    if "password" in updated_user:
+    updated_user = await merge_objects(dict(validated_data),request.ctx.user )
+    print(updated_user)
+    if validated_data.password:
         # password needs to encrypted and then changed
         updated_user["password"] = hashpw(
             bytes(updated_user["password"], encoding="utf-8"), gensalt())
@@ -98,4 +99,5 @@ async def update_user(request, validated_data: UserUpdate):
     except PeeweeException as pe:
         return json({"errors": pe}, 422)
     except Exception as e:
+        print(e.with_traceback())
         return json({"errors": e}, 500)
