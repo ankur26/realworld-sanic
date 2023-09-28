@@ -1,22 +1,18 @@
 
 '''
-The primary helper function for get articles
-Options : 
-single?=True
-id=None or int
-user=None or user (for feed based articles)
-limit=per get how many articles=20 but can be changed
-offset=0 
-tag_filter=None or str | 
-author = None or str | 
-favorited=False | user should exist if this is true
+This is the primary helper to get articles in all kinds of scenarios
+Whether it be with or without a user
+Whether it be with or without a filter
+With some standard defaults for pagination
 '''
+
 from models.Article import Article
 from models.User import User
 from models.Tags import Tags
 from models.Followers import Followers
 from models.TagToArticle import TagToArticle
 from models.FavoritedArticlesByUser import FavoritedArticlesByUser
+from models.Comments import Comments
 from playhouse.shortcuts import model_to_dict
 from sanic import SanicException
 from peewee import IntegrityError
@@ -167,3 +163,19 @@ async def get_single_article(user,article_id=None,article_slug=None):
             article_obj["favoritesCount"] = await favorite_count(article_obj["id"])
             article_obj["tagList"] = await get_tags(article_obj["id"])
             return article_obj
+
+
+async def get_comments(user,article):
+    results = [model_to_dict(row) for row in Comments.select().where(Comments.articleid==article)]
+    for r in results:
+        del r["articleid"]
+        r["author"] = r["userid"]
+        r["author"]["following"] = await following(user["id"],r["author"]["id"]) if user else False
+    return results
+
+async def get_single_comment(user, comment):
+    comment= model_to_dict(Comments.get_or_none(id=comment))
+    del comment["articleid"]
+    comment["author"] = comment["userid"]
+    comment["author"]["following"] = await following(user["id"],comment["author"]["id"]) if user else False
+    return comment

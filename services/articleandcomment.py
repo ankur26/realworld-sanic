@@ -3,18 +3,16 @@ from models.Article import Article
 from models.Tags import Tags
 from models.TagToArticle import TagToArticle
 from models.FavoritedArticlesByUser import FavoritedArticlesByUser
+from models.Comments import Comments
 from helpers.serializer_helper import serialize_output,serialize_multiple,get_query_items,merge_objects
 from middleware.requestcontentvalidator import validate_data
 from middleware.requestvalidator import validate_request_body_exists,validate_request_object_exists_in_body,validate_authorization_token_exists,authorize
-from schemas.ArticleValidationAndSerializationSchema import ArticleCreateType,ArticleOutputType,ArticleUpdateType
+from schemas.ArticleAndCommentValidationAndSerializationSchema import ArticleCreateType,ArticleOutputType,ArticleUpdateType,CommentOutputType,CommentCreateType
 from playhouse.shortcuts import dict_to_model, model_to_dict
-from helpers.articlefetchelper import get_articles_from_helper,get_single_article
+from helpers.article_and_comment_fetch_helper import get_articles_from_helper,get_single_article,get_comments,get_single_comment
 from peewee import IntegrityError
 
-
 article_bp = Blueprint("article",url_prefix="/articles")
-
-
 
 @article_bp.post("/",name="create_article")
 @validate_request_body_exists
@@ -172,3 +170,87 @@ async def update_article(request,validated_data:ArticleUpdateType,slug):
         print(e)
         return SanicException("internal server error",500)
     
+
+@article_bp.delete("/<slug:str>",name="delete_article")
+@validate_authorization_token_exists()
+@authorize()
+async def delete_article(request,slug):
+    user = request.ctx.user
+    article = model_to_dict(Article.get_or_none(slug=slug)) if Article.get_or_none(slug=slug) else None
+    if not article:
+        raise SanicException("Not found",404)
+    else:
+        #We have the article id here we should now go ahead and delete in three tables
+        #TagsToArticle
+        #Comments
+        #FavoritedArticles
+        #Then the article itself
+        #There are Cascade options but in the ORM but I have disabled those for simplicity
+        if user["id"] != article["author"]["id"]:
+            return SanicException("Forbidden",403)
+        else:
+            try:
+                TagToArticle.delete().where(TagToArticle.articleid==article["id"]).execute()
+                Comments.delete().where(Comments.articleid==article["id"]).execute()
+                FavoritedArticlesByUser.delete().where(FavoritedArticlesByUser.articleid==article["id"]).execute()
+                Article.delete().where(Article.slug == slug).execute()
+                return json({"status":True})
+            except Exception as e:
+                print(e)
+                raise SanicException("Something went wrong",500)
+
+
+
+#These are the calls for comments 
+
+@article_bp.get("/<slug:str>/comments",name="get_comments")
+@validate_authorization_token_exists(allow_anonymous=True)
+@authorize()
+async def get_article(request,slug):
+    user = request.ctx.user
+    article = Article.get_or_none(slug=slug)
+    if not article:
+        return SanicException("Not found",404)
+    else:
+        return json(await serialize_multiple(CommentOutputType,await get_comments(user,article),"comments"))
+
+@article_bp.post("/<slug:str>/comments",name="create_comment")
+@validate_request_body_exists
+@validate_request_object_exists_in_body("comment")
+@validate_authorization_token_exists()
+@authorize()
+@validate_data(CommentCreateType,"comment")
+async def create_comment(request, validated_data:CommentCreateType,slug):
+    user = request.ctx.user
+    article = Article.get_or_none(slug=slug)
+    if article:
+        comment = dict_to_model(Comments,{
+            "body":validated_data.body,
+            "userid":user["id"],
+            "articleid":article
+        },ignore_unknown=True)
+        id = comment.save()
+        return json(await serialize_output(CommentOutputType,await get_single_comment(user,id),"comment"))
+    else:
+        raise SanicException("Not found",404)
+
+@article_bp.delete("<slug:str>/comments/<id:int>",name="delete_comment")
+@validate_authorization_token_exists()
+@authorize()
+async def delete_article(request,slug,id):
+    user = request.ctx.user
+    article = Article.get_or_none(slug=slug)
+    comment = Comments.get_or_none(id=id)
+    if not article:
+        raise SanicException("Not found",404)
+    if not comment:
+        raise SanicException("Not found",404)
+    comment_object = model_to_dict(comment)
+    if user["id"] != comment_object["userid"]["id"]:
+        raise SanicException("Forbidden",403)
+    try:
+        comment.delete()
+        return json({"status":"success"})
+    except Exception as e:
+        print(e)
+        raise SanicException("Something went wrong during deleting the data",500)

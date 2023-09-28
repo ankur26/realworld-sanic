@@ -36,3 +36,13 @@ class ArticleUpdateType(BaseModel):
     body:Optional[str] = None
     tagList:Optional[List[str]] = []
     updatedAt:Optional[str] = datetime.now().isoformat()
+
+class CommentCreateType(BaseModel):
+    body:str
+
+class CommentOutputType(BaseModel):
+    id:int
+    createdAt:str
+    updatedAt:str
+    body:str
+    author:ProfileSerializer
