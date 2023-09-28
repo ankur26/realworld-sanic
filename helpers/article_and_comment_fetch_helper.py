@@ -49,7 +49,6 @@ async def get_follower_articles(userid,limit,offset):
 async def get_all_articles(limit,offset,tag,author,favorite):
     #query building sequence starts
     #Not sure if this is the right assumption but we're going to assume that all inputs can arrive at the same time
-    # print(tag,author,favorite)
     subquery = None
     if tag and not author and not favorite:
         t= Tags.get_or_none(tag=tag)
@@ -78,11 +77,11 @@ async def get_all_articles(limit,offset,tag,author,favorite):
     res = []
     
     if subquery is not None:
-        print("1")
+        # print("1")
         if subquery.count() == 0:
             return []
         else:
-            print("2")
+            # print("2")
             query= Article.select().where(Article.id.in_(subquery))
     else:
         print("3")
@@ -107,9 +106,11 @@ async def get_articles_from_helper(
         offset:int=0,
         author:str="",
         tag:str="",
-        favorite:str=""
+        favorite:str="",
+        name:str=""
 )->dict:
     # print(author,tag,favorite)
+    print(name)
     if single and slug and user:
         # We need to get a single article and ensure that the favorite matching is sure
         article = Article.get_or_none(Article.slug==slug)
@@ -124,9 +125,9 @@ async def get_articles_from_helper(
     if not single:
         #We will ignore the slug here and ideally we should not get a slug in this request
         results = None
-        if user:
+        if user and name=="get_feed":
             results = await get_follower_articles(user["id"],limit,offset)
-        else:
+        elif (user and name=="get_articles") or (not user and name=="get_articles") :
             results = await get_all_articles(limit,offset,tag,author,favorite)
         for r in results:
             #The results here only give us a few things, i.e the article and the author.

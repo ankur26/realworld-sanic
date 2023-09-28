@@ -33,14 +33,12 @@ async def create_article(request,validated_data:ArticleCreateType):
             # print(article_id,article_cursor.id)
             taglist = validated_data["tagList"]
             for t in taglist:
-                tag_cursor = Tags.get_or_none(tag=t)
-                if not tag_cursor:
-                    #We will create a tag here and get it's ID
-                    tag_cursor = Tags(tag=t).save()
+                tag_cursor,status = Tags.get_or_create(tag=t)
                 #We now have the article ID and the tag ID at this point, now just add this entry to the tagToarticletable
-                tag_to_article_id = TagToArticle(articleid=article_id,tagid=tag_cursor).save()
-                if not tag_to_article_id:
-                    print("Some error happened")
+                if status:
+                    tag_to_article_id = TagToArticle(articleid=article_id,tagid=tag_cursor.get_id()).save()
+                    if not tag_to_article_id:
+                        print("Some error happened")
                 #We now have a tag list, we now have a article entry
             article_output = await get_single_article(user=current_user,article_id=article_id)   
             return json(await serialize_output(ArticleOutputType,article_output,"article"))
@@ -73,10 +71,11 @@ async def get_articles(request):
         tag=query_dict.get('tag',None),
         favorite=query_dict.get('favorited',None),
         user=user,
-        single=False
+        single=False,
+        name="get_articles"
         )
     results = await serialize_multiple(ArticleOutputType,results,"article",include_counts=True)
-    
+    print(results if query_dict.get("tag") else "")
     return json(results)
 
 @article_bp.get("/feed",name="get_feed")
@@ -92,7 +91,8 @@ async def get_feed(request):
         tag=query_dict.get('tag',None),
         favorite=query_dict.get('favorited',None),
         user=user,
-        single=False
+        single=False,
+        name="get_feed"
         )
     results = await serialize_multiple(ArticleOutputType,results,"article",include_counts=True)
     return json(results)
@@ -143,7 +143,6 @@ async def update_article(request,validated_data:ArticleUpdateType,slug):
     #Get the original tag list
     tags_for_article = TagToArticle.select(Tags).join(Tags,on=(Tags.id == TagToArticle.tagid)).where(TagToArticle.articleid ==article.id).dicts()
     original_tags = [row["tag"] for row in tags_for_article]
-    article
     tags_to_be_added = [tag for tag in original_tags if tag in validated_data.tagList]
     tags_to_be_removed = [tag for tag in original_tags if tag not in validated_data.tagList]
     try:
