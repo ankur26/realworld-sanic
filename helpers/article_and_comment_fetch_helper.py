@@ -98,6 +98,13 @@ async def get_all_articles(limit,offset,tag,author,favorite):
         res = [model_to_dict(row) for row in query.paginate(lower+1,higher)]
     return res
 
+async def get_tags_following_favorite_information(article,user=None):
+        article["tagList"] = await get_tags(article["id"])
+        article["favorited"] =await favorited(user["id"],article["id"]) if user else False
+        article["author"]["following"] =await following(user["id"],article["author"]["id"]) if user else False
+        article["favoritesCount"] = await favorite_count(article["id"])
+        return article
+
 async def get_articles_from_helper(
         single:bool=True,
         slug:str="",
@@ -110,19 +117,9 @@ async def get_articles_from_helper(
         name:str=""
 )->dict:
     # print(author,tag,favorite)
-    print(name)
-    if single and slug and user:
-        # We need to get a single article and ensure that the favorite matching is sure
-        article = Article.get_or_none(Article.slug==slug)
-        if not article:
-            raise SanicException("Not found",404)
-        article = model_to_dict(Article.get(Article.slug==slug))
-        article["author"]["following"] == await following(user["id"],article["author"]["id"])
-        article["favorited"] = await favorited(user["id"],article["id"])             
-        article["favoritesCount"] = await favorite_count(article["id"])
-        article["tagList"] = await get_tags(article["id"])
-        return article
-    if not single:
+    if single:
+        return await get_tags_following_favorite_information(user,model_to_dict(Article.get(Article.slug==slug)))
+    else:
         #We will ignore the slug here and ideally we should not get a slug in this request
         results = None
         if user and name=="get_feed":
@@ -133,10 +130,7 @@ async def get_articles_from_helper(
             #The results here only give us a few things, i.e the article and the author.
             #There's a few more things that need to be added, i.e following the user (if there is a user)
             #Checking the favorited counts, and also checking whether you've favorited that article.
-            r["tagList"] = await get_tags(r["id"])
-            r["favorited"] =await favorited(user["id"],r["id"]) if user else False
-            r["author"]["following"] =await following(user["id"],r["author"]["id"]) if user else False
-            r["favoritesCount"] = await favorite_count(r["id"])
+            r= await get_tags_following_favorite_information(r,user)
         return results
 
 async def get_single_article(user,article_id=None,article_slug=None):
@@ -155,14 +149,7 @@ async def get_single_article(user,article_id=None,article_slug=None):
         except Exception as e:
             print(e)
             raise SanicException("Non database issue",500)
-        
-        article_obj = [model_to_dict(row) for row in article_query][0]
-        if article_obj:
-            article_obj["favorited"] =await favorited(user["id"],article_obj["id"]) if user else False
-            article_obj["author"]["following"]=await following(user["id"],article_obj["author"]["id"]) if user else False
-            article_obj["favoritesCount"] = await favorite_count(article_obj["id"])
-            article_obj["tagList"] = await get_tags(article_obj["id"])
-            return article_obj
+        return await get_tags_following_favorite_information([model_to_dict(row) for row in article_query][0],user)
 
 
 async def get_comments(user,article):
