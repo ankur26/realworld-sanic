@@ -19,7 +19,7 @@ async def get_token(user:dict)->(bool,str|None):
         token = encode(payload=claims,key=key)
         return True,token
     except Exception as e:
-        print("e")
+        print(e)
         return False,None
 
 

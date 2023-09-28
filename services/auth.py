@@ -11,7 +11,7 @@ from peewee import PeeweeException
 
 
 auth_bp = Blueprint("auth", url_prefix="/users")
-
+user_bp = Blueprint("user",url_prefix="/user")
 
 @auth_bp.post("/", name="register")
 @validate_request_body_exists
@@ -41,7 +41,7 @@ async def register(request, validated_data: UserRegistration):
     # return text("You are the register route")
 
 
-@auth_bp.get("/", name="get_user")
+@user_bp.get("/", name="get_user")
 @validate_authorization_token_exists()
 @authorize()
 async def get_user(request):
@@ -72,7 +72,7 @@ async def login(request, validated_data: UserLogin):
         }, 422)
 
 
-@auth_bp.put("/", name="update_user")
+@user_bp.put("/", name="update_user")
 @validate_request_body_exists
 @validate_request_object_exists_in_body("user")
 @validate_authorization_token_exists()
@@ -82,7 +82,7 @@ async def update_user(request, validated_data: UserUpdate):
     # Get the user id which was set inside the context by the authorization
     # And set it inside our validated model
     updated_user = await merge_objects(dict(validated_data),request.ctx.user )
-    print(updated_user)
+    # print(updated_user)
     if validated_data.password:
         # password needs to encrypted and then changed
         updated_user["password"] = hashpw(
@@ -99,5 +99,5 @@ async def update_user(request, validated_data: UserUpdate):
     except PeeweeException as pe:
         return json({"errors": pe}, 422)
     except Exception as e:
-        print(e.with_traceback())
+        print(e)
         return json({"errors": e}, 500)

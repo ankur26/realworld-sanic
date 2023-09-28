@@ -32,7 +32,6 @@ async def get_tags(articleid):
                 Tags,on=(Tags.id==TagToArticle.tagid)).join(
                     Article, on=(Article.id==TagToArticle.articleid)).where(
                         Article.id==articleid)
-    print(tags.dicts())
     return [tag.tagid.tag for tag in tags]
 
 async def get_follower_articles(userid,limit,offset):
@@ -57,21 +56,21 @@ async def get_all_articles(limit,offset,tag,author,favorite):
         if t:
             subquery = TagToArticle.select(TagToArticle.articleid).where(TagToArticle.tagid==t)
         else:
-            raise SanicException("Tag not found",404)
+            # raise SanicException("Tag not found",404)
             return []
     elif not tag and author and not favorite:
         user_id = User.get_or_none(username=author)
         if user_id:
             subquery = Article.select(Article.id).where(Article.author == user_id)
         else:
-            raise SanicException("Author not found",404)
+            # raise SanicException("Author not found",404)
             return []
     elif not tag and not author and favorite:
         user_id = User.get_or_none(username=favorite)
         if user_id:
             subquery = FavoritedArticlesByUser.select(FavoritedArticlesByUser.articleid).where(FavoritedArticlesByUser.userid == user_id)
         else:
-            raise SanicException("No user like this exists",404)
+            # raise SanicException("No user like this exists",404)
             return []
     
     lower = offset

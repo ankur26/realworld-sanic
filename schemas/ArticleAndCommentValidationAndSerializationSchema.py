@@ -35,7 +35,7 @@ class ArticleUpdateType(BaseModel):
     description:Optional[str] = None
     body:Optional[str] = None
     tagList:Optional[List[str]] = []
-    updatedAt:Optional[str] = datetime.now().isoformat()
+    updatedAt:Optional[str] = datetime.utcnow().isoformat()[:-3]+"Z"
 
 class CommentCreateType(BaseModel):
     body:str

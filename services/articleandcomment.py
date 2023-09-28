@@ -75,7 +75,7 @@ async def get_articles(request):
         user=user,
         single=False
         )
-    results = await serialize_multiple(ArticleOutputType,results,"article")
+    results = await serialize_multiple(ArticleOutputType,results,"article",include_counts=True)
     
     return json(results)
 
@@ -94,7 +94,7 @@ async def get_feed(request):
         user=user,
         single=False
         )
-    results = await serialize_multiple(ArticleOutputType,results,"article")
+    results = await serialize_multiple(ArticleOutputType,results,"article",include_counts=True)
     return json(results)
 
 
@@ -212,7 +212,7 @@ async def get_article(request,slug):
     if not article:
         return SanicException("Not found",404)
     else:
-        return json(await serialize_multiple(CommentOutputType,await get_comments(user,article),"comments"))
+        return json(await serialize_multiple(CommentOutputType,await get_comments(user,article),"comment"))
 
 @article_bp.post("/<slug:str>/comments",name="create_comment")
 @validate_request_body_exists
