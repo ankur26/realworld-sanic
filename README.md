@@ -15,19 +15,18 @@ For more information on how to this works with other frontends/backends, head ov
 
 # How it works
 
-(.venv) ankurbhatkalkar@pop-os:~/Documents/realworld-starter-kit$ tree
-.
+```.
 ├── conduit.db
 ├── helpers
 │   ├── article_and_comment_fetch_helper.py
 │   ├── jwt_token_helper.py
 │   └── serializer_helper.py
 ├── middleware
-│   ├── \_\_init\_\_.py
+│   ├── __init__.py
 │   ├── requestcontentvalidator.py
 │   └── requestvalidator.py
 ├── models
-│   ├── \_\_init\_\_.py
+│   ├── __init__.py
 │   ├── Article.py
 │   ├── Base.py
 │   ├── Comments.py
@@ -38,18 +37,18 @@ For more information on how to this works with other frontends/backends, head ov
 │   └── User.py
 ├── requirements.txt
 ├── schemas
-│   ├── \_\_init\_\_.py
+│   ├── __init__.py
 │   ├── ArticleAndCommentValidationAndSerializationSchema.py
 │   ├── ProfileSerializationSchemas.py
 │   └── UserValidationAndSerializationSchemas.py
 ├── server.py
 └── services
-    ├── \_\_init\_\_.py
+    ├── __init__.py
     ├── articleandcomment.py
     ├── auth.py
     ├── profile.py
     └── tag.py
-
+```
 
 
 # Getting started
