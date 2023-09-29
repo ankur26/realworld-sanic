@@ -15,39 +15,38 @@ For more information on how to this works with other frontends/backends, head ov
 
 This is then general folder structure of the application
 
-```.
-├── conduit.db (This is the database that gets created on app startup)
-├── helpers ( Helpers to offload repeated code from services )
+```
+├── helpers (Offloaded repetitive function calls)
+│   ├── __init__.py
 │   ├── article_and_comment_fetch_helper.py
 │   ├── jwt_token_helper.py
 │   └── serializer_helper.py
-├── middleware ( Middleware for every request )
+├── middleware (Decorator style functions for middleware such as validation and token checks)
 │   ├── __init__.py
-│   ├── requestcontentvalidator.py
-│   └── requestvalidator.py
-├── models (Database ORM models)
+│   ├── request_content_validator.py
+│   └── request_header_and_body_validator.py
+├── models (Database models - used to create and query)
 │   ├── __init__.py
-│   ├── Article.py
-│   ├── Base.py
-│   ├── Comments.py
-│   ├── FavoritedArticlesByUser.py
-│   ├── Followers.py
-│   ├── Tags.py
-│   ├── TagToArticle.py
-│   └── User.py
-├── requirements.txt 
-├── schemas (Validation and serialization schemas for incoming and outgoing data)
+│   ├── article.py
+│   ├── articletag.py
+│   ├── base.py
+│   ├── comment.py
+│   ├── follower.py
+│   ├── tag.py
+│   ├── userfavorite.py
+│   └── user.py
+├── schemas (Used to validate incoming requests and serialize outgoing ones)
 │   ├── __init__.py
-│   ├── ArticleAndCommentValidationAndSerializationSchema.py
-│   ├── ProfileSerializationSchemas.py
-│   └── UserValidationAndSerializationSchemas.py
-├── server.py (startup file for sanic to load the app)
-└── services (core files which cover all the routes for API)
+│   ├── article_comment_schema.py
+│   ├── profile_schema.py
+│   └── user_schema.py
+└── services (Core route blueprints, responsible for overall request response cycle)
     ├── __init__.py
-    ├── articleandcomment.py
-    ├── auth.py
-    ├── profile.py
-    └── tag.py
+    ├── article_comment_service.py
+    ├── auth_service.py
+    ├── profile_service.py
+    └── tag_service.py
+├── server.py (Core server file, has setup and configuration)
 ```
 
 # Getting started
@@ -61,7 +60,7 @@ This is then general folder structure of the application
     - Linux - using `source .venv/bin/activate`
 
 4. Install the required dependencies using `pip install -r requirements.txt`
-5. Launch the app locally using `sanic server:create_app --factory (--dev:optional)`
+5. Launch the app locally using `sanic server:create_app --dev`(Dev mode) or `sanic server:create_app`(Production mode)
 
 ## Specs tracker
 - Auth
