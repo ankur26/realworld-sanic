@@ -3,7 +3,7 @@
 > ### [Sanic](https://sanic.dev/en/) codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld) spec and API.
 
 
-### [Demo](https://demo.realworld.io/)&nbsp;&nbsp;&nbsp;&nbsp;[RealWorld](https://github.com/gothinkster/realworld) (Work in progress, these are the original links)
+### [Demo](https://demo.realworld.io/)&nbsp;&nbsp;&nbsp;&nbsp;[RealWorld](https://github.com/gothinkster/realworld)
 
 
 This codebase was created to demonstrate a backend API built with **Sanic** including CRUD operations, authentication, routing, pagination, and more.
@@ -52,6 +52,12 @@ This is then general folder structure of the application
     └── tag.py
 ```
 
+# Libraries used
+1. [Sanic](sanic.dev/) - asynchronous Python web framework
+2. [Peewee](http://docs.peewee-orm.com/en/latest/) - easy to use ORM
+3. [Pydantic](https://docs.pydantic.dev/latest/) - Fast and extensible validation library, most used validation library for Python
+4. [Isort](https://pycqa.github.io/isort/index.html) and [Black](https://black.readthedocs.io/en/stable/) for import orders, and linting.
+5. [Bcrpyt](https://pypi.org/project/bcrypt/) for password hashing and [PyJWT](https://pyjwt.readthedocs.io/en/stable/) for authentication.
 
 # Getting started
 
@@ -65,4 +71,41 @@ This is then general folder structure of the application
 
 4. Install the required dependencies using `pip install -r requirements.txt`
 5. Launch the app locally using `sanic server:create_app --factory (--dev:optional)`
+
+
+# Specs tracker
+- Auth
+    - [x] Registration
+    - [x] Authentication
+    - [x] Get current user
+    - [x] Update User
+- Profile
+    - [x] Get Profile
+    - [x] Follow User
+    - [x] Unfollow User
+- Articles
+    - [x] List Articles
+    - [x] Get Articles
+    - [x] Get Feed
+    - [x] Fitler Articles
+    - [x] Get Article
+    - [x] Create Article
+    - [x] Update Article
+    - [x] Delete Article
+- Comments
+    - [x] Get Comments
+    - [x] Add Comments
+    - [x] Delete Comments
+- Tags
+    - [x] Get Tags
+
+
+- Additional Features (as mentioned in Sanic's best practices docs and some more generic stuff)
+- [x] Centralized logging using Sanic logger
+- [x] Custom exception handler and logging using Sanic logger and Sanic exception
+- [x] Segregation of services using Sanic Blueprints
+- [ ] Unit testing
+- [ ] Containerization using docker
+- [ ] OpenAPI spec
+- [ ] Migration to poetry for package manager and script setup
 
