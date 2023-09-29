@@ -1,8 +1,9 @@
 from bcrypt import checkpw, gensalt, hashpw
 from peewee import PeeweeException
 from playhouse.shortcuts import dict_to_model, model_to_dict
-from sanic import Blueprint, SanicException, json, BadRequest,Forbidden
+from sanic import BadRequest, Blueprint, Forbidden, SanicException, json
 from sanic.log import logger
+
 from helpers.jwt_token_helper import get_token
 from helpers.serializer_helper import merge_objects, serialize_output
 from middleware.requestcontentvalidator import validate_data
@@ -55,12 +56,12 @@ async def register(request, validated_data: UserRegistration):
 @validate_authorization_token_exists()
 @authorize()
 async def get_user(request):
-        logger.info("get_user")        
-        if request.ctx.user:
-            logger.info("returning user")        
-            return json(await serialize_output(UserOutput, request.ctx.user, "user"))
-        else:
-            raise SanicException("Something went wrong while serialzingt the user", 500)
+    logger.info("get_user")
+    if request.ctx.user:
+        logger.info("returning user")
+        return json(await serialize_output(UserOutput, request.ctx.user, "user"))
+    else:
+        raise SanicException("Something went wrong while serialzingt the user", 500)
 
 
 @auth_bp.post("/login", name="login")
@@ -79,7 +80,8 @@ async def login(request, validated_data: UserLogin):
                 logger.info("User validated")
                 return json(await serialize_output(UserOutput, output_data, "user"))
             else:
-                return SanicException("Something went wrong during token generation", 500
+                return SanicException(
+                    "Something went wrong during token generation", 500
                 )
         else:
             return Forbidden("Password does not match", 403)
@@ -121,4 +123,3 @@ async def update_user(request, validated_data: UserUpdate):
         raise SanicException(f"{pe}", 422)
     except Exception as e:
         raise SanicException(f"{e}", 500)
-

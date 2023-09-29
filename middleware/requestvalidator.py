@@ -1,7 +1,8 @@
 from functools import wraps
 
-from sanic import BadRequest,Forbidden,SanicException,Unauthorized
+from sanic import BadRequest, Forbidden, SanicException, Unauthorized
 from sanic.log import logger
+
 from helpers.jwt_token_helper import check_token_and_return_status
 
 
@@ -21,7 +22,9 @@ def validate_request_object_exists_in_body(key):
     def decorator(func):
         @wraps(func)
         async def wrapper(request, *args, **kwargs):
-            logger.info("validate_request_object_exists_in_body: checking body for {key} object")
+            logger.info(
+                "validate_request_object_exists_in_body: checking body for {key} object"
+            )
             if not request.json.get(key, None):
                 raise BadRequest({"body": f"{key} cannot be empty"}, 422)
             res = await func(request, *args, **kwargs)
@@ -44,16 +47,18 @@ def validate_authorization_token_exists(allow_anonymous=False):
                     "Token "
                 ):
                     raise BadRequest(
-                        {
-                                "header": "Authorization missing bearer or token prefix"
-                        },
+                        {"header": "Authorization missing bearer or token prefix"},
                         401,
                     )
-                logger.info("validate_authorization_token_exists: going to next method with auth header")
+                logger.info(
+                    "validate_authorization_token_exists: going to next method with auth header"
+                )
                 res = await func(request, *args, **kwargs)
             else:
                 if allow_anonymous:
-                    logger.info("validate_authorization_token_exists: allowed anonymous route")
+                    logger.info(
+                        "validate_authorization_token_exists: allowed anonymous route"
+                    )
                     res = await func(request, *args, **kwargs)
                 else:
                     raise Unauthorized({"headers": "Missing Bearer token"}, 403)
@@ -79,7 +84,8 @@ def authorize():
                     user["token"] = bearer_token
                     request.ctx.user = user
                 else:
-                    raise SanicException(token_check_output["error"],
+                    raise SanicException(
+                        token_check_output["error"],
                         status_code=token_check_output["return_status_code"],
                     )
             elif not bearer_token:

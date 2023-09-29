@@ -1,7 +1,8 @@
 from peewee import IntegrityError
 from playhouse.shortcuts import dict_to_model, model_to_dict
-from sanic import Blueprint, SanicException, json, NotFound,Forbidden
+from sanic import Blueprint, Forbidden, NotFound, SanicException, json
 from sanic.log import logger
+
 from helpers.article_and_comment_fetch_helper import (get_articles_from_helper,
                                                       get_comments,
                                                       get_single_article,
@@ -52,7 +53,10 @@ async def create_article(request, validated_data: ArticleCreateType):
                         articleid=article_id, tagid=tag_cursor.get_id()
                     ).save()
                     if not tag_to_article_id:
-                        raise SanicException("Some error happened while attaching a tag to an article",500)
+                        raise SanicException(
+                            "Some error happened while attaching a tag to an article",
+                            500,
+                        )
             logger.info("create_article: getting final readied article")
             article_output = await get_single_article(
                 user=current_user, article_id=article_id
@@ -215,7 +219,9 @@ async def update_article(request, validated_data: ArticleUpdateType, slug):
             if not toaid:
                 toaid = TagToArticle(articleid=original["id"], tagid=tid)
                 toaid.save()
-        logger.info("update_article: tags revalidated and article to tag association complete, returning output")
+        logger.info(
+            "update_article: tags revalidated and article to tag association complete, returning output"
+        )
         return json(
             await serialize_output(
                 ArticleOutputType,
@@ -264,28 +270,6 @@ async def delete_article(request, slug):
                 raise SanicException(f"Something went wrong {e}", 500)
 
 
-@article_bp.delete("<slug:str>/comments/<id:int>", name="delete_comment")
-@validate_authorization_token_exists()
-@authorize()
-async def delete_article(request, slug, id):
-    logger.info("Deleting article with slug {}".format(slug))
-    user = request.ctx.user
-    article = Article.get_or_none(slug=slug)
-    comment = Comments.get_or_none(id=id)
-    if not article:
-        raise NotFound("Not found", 404)
-    if not comment:
-        raise NotFound("Not found", 404)
-    comment_object = model_to_dict(comment)
-    if user["id"] != comment_object["userid"]["id"]:
-        raise Forbidden("Forbidden", 403)
-    try:
-        comment.delete()
-        return json({"status": "success"})
-    except Exception as e:
-        raise SanicException(f"Something went wrong during deleting the data {e}", 500)
-
-
 # These are the calls for comments
 
 
@@ -314,7 +298,11 @@ async def get_comments_for_article(request, slug):
 @validate_data(CommentCreateType, "comment")
 async def create_comment(request, validated_data: CommentCreateType, slug):
     user = request.ctx.user
-    logger.info("create_comment: creating comment for slug {} by user {}".format(slug,user["username"]))
+    logger.info(
+        "create_comment: creating comment for slug {} by user {}".format(
+            slug, user["username"]
+        )
+    )
     article = Article.get_or_none(slug=slug)
     if article:
         comment = dict_to_model(
@@ -331,3 +319,24 @@ async def create_comment(request, validated_data: CommentCreateType, slug):
     else:
         raise SanicException("Not found", 404)
 
+
+@article_bp.delete("<slug:str>/comments/<id:int>", name="delete_comment")
+@validate_authorization_token_exists()
+@authorize()
+async def delete_comment(request, slug, id):
+    logger.info("Deleting article with slug {}".format(slug))
+    user = request.ctx.user
+    article = Article.get_or_none(slug=slug)
+    comment = Comments.get_or_none(id=id)
+    if not article:
+        raise NotFound("Not found", 404)
+    if not comment:
+        raise NotFound("Not found", 404)
+    comment_object = model_to_dict(comment)
+    if user["id"] != comment_object["userid"]["id"]:
+        raise Forbidden("Forbidden", 403)
+    try:
+        comment.delete()
+        return json({"status": "success"})
+    except Exception as e:
+        raise SanicException(f"Something went wrong during deleting the data {e}", 500)

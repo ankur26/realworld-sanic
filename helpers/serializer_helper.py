@@ -1,4 +1,3 @@
-
 from sanic import Request, json
 from sanic.log import logger
 
@@ -43,15 +42,17 @@ async def get_query_items(query_args):
     }
 
 
-
 async def serialize_error(request: Request, exception: Exception = None):
-        logger.info(request)
-        logger.error(exception)
-        message = getattr(exception, "message", "Some error happened")
-        status_code = getattr(exception, "status_code", 500)
-        return json({
-             "errors":{
-                  "message":f"{message if message else exception}",
-                  "exception":f"{exception}"
-             }
-        },status_code)
+    logger.info(request)
+    logger.error(exception)
+    message = getattr(exception, "message", "Some error happened")
+    status_code = getattr(exception, "status_code", 500)
+    return json(
+        {
+            "errors": {
+                "message": f"{message if message else exception}",
+                "exception": f"{exception}",
+            }
+        },
+        status_code,
+    )

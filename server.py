@@ -2,13 +2,13 @@ from peewee import SqliteDatabase
 from sanic import Blueprint, Sanic, text
 from sanic.log import logger
 
+from helpers.serializer_helper import serialize_error
 from models import *
 from services.articleandcomment import article_bp
 from services.auth import auth_bp, user_bp
 from services.profile import profile_bp
 from services.tag import tag_bp
 
-from helpers.serializer_helper import serialize_error
 
 async def hello(request):
     return text("Welcome to app")
@@ -19,7 +19,7 @@ def create_app():
     app = Sanic("conduit")
     logger.info("Created app!")
     logger.info("Adding exception serializer")
-    app.error_handler.add(Exception,serialize_error)
+    app.error_handler.add(Exception, serialize_error)
 
     logger.info("Adding Baseline route just to test a ping")
     app.add_route(hello, "/")
@@ -38,7 +38,7 @@ def create_app():
             TagToArticle.TagToArticle,
         ]
     )
-    logger.info( "Make the api blueprint here")
+    logger.info("Make the api blueprint here")
     api = Blueprint.group(
         auth_bp, profile_bp, article_bp, tag_bp, user_bp, url_prefix="/api"
     )

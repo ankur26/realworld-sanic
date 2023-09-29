@@ -7,7 +7,7 @@ With some standard defaults for pagination
 
 from peewee import IntegrityError
 from playhouse.shortcuts import model_to_dict
-from sanic import SanicException,NotFound
+from sanic import NotFound, SanicException
 from sanic.log import logger
 
 from models.Article import Article
@@ -20,12 +20,14 @@ from models.User import User
 
 
 async def following(current: int, following: int) -> bool:
-    logger.info("following: running for id {} to id {}".format(current,following))
+    logger.info("following: running for id {} to id {}".format(current, following))
     return Followers.get_or_none(current=current, following=following) is not None
 
 
 async def favorited(userid: int, articleid: int) -> bool:
-    logger.info("favorited: running for user {} to article {}".format(userid,articleid))
+    logger.info(
+        "favorited: running for user {} to article {}".format(userid, articleid)
+    )
     return (
         FavoritedArticlesByUser.get_or_none(userid=userid, articleid=articleid)
         is not None
@@ -51,7 +53,11 @@ async def get_tags(articleid):
 
 
 async def get_follower_articles(userid, limit, offset):
-    logger.info("get_follower_articles with limit {} for user {} starting from offset {}".format(limit,userid,offset))
+    logger.info(
+        "get_follower_articles with limit {} for user {} starting from offset {}".format(
+            limit, userid, offset
+        )
+    )
     subquery_user = Followers.select(Followers.following).where(
         Followers.current == userid
     )
@@ -82,7 +88,9 @@ async def get_follower_articles(userid, limit, offset):
 async def get_all_articles(limit, offset, tag, author, favorite):
     # query building sequence starts
     # Not sure if this is the right assumption but we're going to assume that all inputs can arrive at the same time
-    logger.info("get_all_articles: fetching articles with linit {} offset {} tag {} author {} favorite {}")
+    logger.info(
+        "get_all_articles: fetching articles with linit {} offset {} tag {} author {} favorite {}"
+    )
     subquery = None
     if tag and not author and not favorite:
         t = Tags.get_or_none(tag=tag)
@@ -115,16 +123,12 @@ async def get_all_articles(limit, offset, tag, author, favorite):
     res = []
 
     if subquery is not None:
-
         if subquery.count() == 0:
             return []
         else:
-
             query = Article.select().where(Article.id.in_(subquery))
     else:
-
         query = Article.select()
- 
 
     counts_for_articles = query.count()
     if counts_for_articles < lower:
@@ -139,7 +143,11 @@ async def get_all_articles(limit, offset, tag, author, favorite):
 
 
 async def get_tags_following_favorite_information(article, user=None):
-    logger.info("get_tags_following_favorite_information: for article {} with user {}".format(article["id"],user["username"] if user else "anonymous"))
+    logger.info(
+        "get_tags_following_favorite_information: for article {} with user {}".format(
+            article["id"], user["username"] if user else "anonymous"
+        )
+    )
     article["tagList"] = await get_tags(article["id"])
     article["favorited"] = await favorited(user["id"], article["id"]) if user else False
     article["author"]["following"] = (
@@ -195,7 +203,9 @@ async def get_single_article(user, article_id=None, article_slug=None):
             if article_query.count() == 0:
                 raise NotFound("The slug or ID does not exist", 404)
         except IntegrityError as ie:
-            raise SanicException(f"There has been an an internal server error {ie}", 500)
+            raise SanicException(
+                f"There has been an an internal server error {ie}", 500
+            )
         return await get_tags_following_favorite_information(
             [model_to_dict(row) for row in article_query][0], user
         )
