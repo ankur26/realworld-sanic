@@ -15,17 +15,19 @@ For more information on how to this works with other frontends/backends, head ov
 
 # How it works
 
+This is then general folder structure of the application
+
 ```.
-├── conduit.db
-├── helpers
+├── conduit.db (This is the database that gets created on app startup)
+├── helpers ( Helpers to offload repeated code from services )
 │   ├── article_and_comment_fetch_helper.py
 │   ├── jwt_token_helper.py
 │   └── serializer_helper.py
-├── middleware
+├── middleware ( Middleware for every request )
 │   ├── __init__.py
 │   ├── requestcontentvalidator.py
 │   └── requestvalidator.py
-├── models
+├── models (Database ORM models)
 │   ├── __init__.py
 │   ├── Article.py
 │   ├── Base.py
@@ -35,14 +37,14 @@ For more information on how to this works with other frontends/backends, head ov
 │   ├── Tags.py
 │   ├── TagToArticle.py
 │   └── User.py
-├── requirements.txt
-├── schemas
+├── requirements.txt 
+├── schemas (Validation and serialization schemas for incoming and outgoing data)
 │   ├── __init__.py
 │   ├── ArticleAndCommentValidationAndSerializationSchema.py
 │   ├── ProfileSerializationSchemas.py
 │   └── UserValidationAndSerializationSchemas.py
-├── server.py
-└── services
+├── server.py (startup file for sanic to load the app)
+└── services (core files which cover all the routes for API)
     ├── __init__.py
     ├── articleandcomment.py
     ├── auth.py
