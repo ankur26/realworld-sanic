@@ -2,7 +2,6 @@
 
 > ### [Sanic](https://sanic.dev/en/) codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld) spec and API.
 
-
 ### [Demo](https://demo.realworld.io/)&nbsp;&nbsp;&nbsp;&nbsp;[RealWorld](https://github.com/gothinkster/realworld)
 
 
@@ -11,7 +10,6 @@ This codebase was created to demonstrate a backend API built with **Sanic** incl
 We've gone to great lengths to adhere to the **Sanic** community styleguides & best practices.
 
 For more information on how to this works with other frontends/backends, head over to the [RealWorld](https://github.com/gothinkster/realworld) repo.
-
 
 # How it works
 
@@ -52,13 +50,6 @@ This is then general folder structure of the application
     └── tag.py
 ```
 
-# Libraries used
-1. [Sanic](sanic.dev/) - asynchronous Python web framework
-2. [Peewee](http://docs.peewee-orm.com/en/latest/) - easy to use ORM
-3. [Pydantic](https://docs.pydantic.dev/latest/) - Fast and extensible validation library, most used validation library for Python
-4. [Isort](https://pycqa.github.io/isort/index.html) and [Black](https://black.readthedocs.io/en/stable/) for import orders, and linting.
-5. [Bcrpyt](https://pypi.org/project/bcrypt/) for password hashing and [PyJWT](https://pyjwt.readthedocs.io/en/stable/) for authentication.
-
 # Getting started
 
 1. Clone the repo
@@ -72,8 +63,7 @@ This is then general folder structure of the application
 4. Install the required dependencies using `pip install -r requirements.txt`
 5. Launch the app locally using `sanic server:create_app --factory (--dev:optional)`
 
-
-# Specs tracker
+## Specs tracker
 - Auth
     - [x] Registration
     - [x] Authentication
@@ -100,7 +90,7 @@ This is then general folder structure of the application
     - [x] Get Tags
 
 
-- Additional Features (as mentioned in Sanic's best practices docs and some more generic stuff)
+## Additional Features (as mentioned in Sanic's best practices docs and some more generic stuff)
 - [x] Centralized logging using Sanic logger
 - [x] Custom exception handler and logging using Sanic logger and Sanic exception
 - [x] Segregation of services using Sanic Blueprints
@@ -109,3 +99,9 @@ This is then general folder structure of the application
 - [ ] OpenAPI spec
 - [ ] Migration to poetry for package manager and script setup
 
+# Libraries used
+1. [Sanic](sanic.dev/) - asynchronous Python web framework
+2. [Peewee](http://docs.peewee-orm.com/en/latest/) - easy to use ORM
+3. [Pydantic](https://docs.pydantic.dev/latest/) - Fast and extensible validation library, most used validation library for Python
+4. [Isort](https://pycqa.github.io/isort/index.html) and [Black](https://black.readthedocs.io/en/stable/) for import orders, and linting.
+5. [Bcrpyt](https://pypi.org/project/bcrypt/) for password hashing and [PyJWT](https://pyjwt.readthedocs.io/en/stable/) for authentication.
