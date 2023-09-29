@@ -1,5 +1,7 @@
-from peewee import CharField, BlobField
+from peewee import BlobField, CharField
+
 from .Base import BaseModel
+
 
 class User(BaseModel):
     username = CharField(unique=True)

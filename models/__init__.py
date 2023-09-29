@@ -1,10 +1,10 @@
 __all__ = [
-    'User',
-    'Base',
-    'Followers',
-    'Article',
-    'Tags',
-    'Comments',
-    'FavoritedArticlesByUser',
-    'TagToArticle',
+    "User",
+    "Base",
+    "Followers",
+    "Article",
+    "Tags",
+    "Comments",
+    "FavoritedArticlesByUser",
+    "TagToArticle",
 ]
