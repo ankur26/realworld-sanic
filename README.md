@@ -56,7 +56,7 @@ This is then general folder structure of the application
 # Getting started
 
 1. Clone the repo
-2. Create a virtual environemnt using venv, virtualenv inside the repo directory
+2. Create a virtual environment using venv, virtualenv inside the repo directory
 > python -m venv .venv
 
 3. Activate the virtual enviroment in 
