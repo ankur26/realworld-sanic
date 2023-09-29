@@ -9,18 +9,20 @@ from helpers.article_and_comment_fetch_helper import (get_articles_from_helper,
                                                       get_single_comment)
 from helpers.serializer_helper import (get_query_items, merge_objects,
                                        serialize_multiple, serialize_output)
-from middleware.requestcontentvalidator import validate_data
-from middleware.requestvalidator import (
+from middleware.request_content_validator import validate_data
+from middleware.request_header_and_body_validator import (
     authorize, validate_authorization_token_exists,
     validate_request_body_exists, validate_request_object_exists_in_body)
-from models.Article import Article
-from models.Comments import Comments
-from models.FavoritedArticlesByUser import FavoritedArticlesByUser
-from models.Tags import Tags
-from models.TagToArticle import TagToArticle
-from schemas.ArticleAndCommentValidationAndSerializationSchema import (
-    ArticleCreateType, ArticleOutputType, ArticleUpdateType, CommentCreateType,
-    CommentOutputType)
+from models.article import Article
+from models.articletag import TagToArticle
+from models.comment import Comment
+from models.tag import Tag
+from models.userfavorite import FavoritedArticlesByUser
+from schemas.article_comment_schema import (ArticleCreateType,
+                                            ArticleOutputType,
+                                            ArticleUpdateType,
+                                            CommentCreateType,
+                                            CommentOutputType)
 
 article_bp = Blueprint("article", url_prefix="/articles")
 
@@ -46,7 +48,7 @@ async def create_article(request, validated_data: ArticleCreateType):
             logger.info("create_article: creating or updating tag relations")
             taglist = validated_data["tagList"]
             for t in taglist:
-                tag_cursor, status = Tags.get_or_create(tag=t)
+                tag_cursor, status = Tag.get_or_create(tag=t)
                 # We now have the article ID and the tag ID at this point, now just add this entry to the tagToarticletable
                 if status:
                     tag_to_article_id = TagToArticle(
@@ -194,8 +196,8 @@ async def update_article(request, validated_data: ArticleUpdateType, slug):
     # Get the original tag list
     logger.info("update_article: revalidate tags")
     tags_for_article = (
-        TagToArticle.select(Tags)
-        .join(Tags, on=(Tags.id == TagToArticle.tagid))
+        TagToArticle.select(Tag)
+        .join(Tag, on=(Tag.id == TagToArticle.tagid))
         .where(TagToArticle.articleid == article.id)
         .dicts()
     )
@@ -207,14 +209,14 @@ async def update_article(request, validated_data: ArticleUpdateType, slug):
     try:
         # Ensure that our tags are now updated
         for tag in tags_to_be_removed:
-            tid = Tags.get_or_none(tag=tag)
+            tid = Tag.get_or_none(tag=tag)
             toaid = TagToArticle.get_or_none(articleid=original["id"], tagid=tid)
             if toaid:
                 TagToArticle.delete_by_id(toaid)
         for tag in tags_to_be_added:
-            tid = Tags.get_or_none(tag=tag)
+            tid = Tag.get_or_none(tag=tag)
             if not tid:
-                tid = Tags(tag=tag).save()
+                tid = Tag(tag=tag).save()
             toaid = TagToArticle.get_or_none(articleid=original["id"], tagid=tid)
             if not toaid:
                 toaid = TagToArticle(articleid=original["id"], tagid=tid)
@@ -249,7 +251,7 @@ async def delete_article(request, slug):
     else:
         # We have the article id here we should now go ahead and delete in three tables
         # TagsToArticle
-        # Comments
+        # Comment
         # FavoritedArticles
         # Then the article itself
         # There are Cascade options but in the ORM but I have disabled those for simplicity
@@ -260,7 +262,7 @@ async def delete_article(request, slug):
                 TagToArticle.delete().where(
                     TagToArticle.articleid == article["id"]
                 ).execute()
-                Comments.delete().where(Comments.articleid == article["id"]).execute()
+                Comment.delete().where(Comment.articleid == article["id"]).execute()
                 FavoritedArticlesByUser.delete().where(
                     FavoritedArticlesByUser.articleid == article["id"]
                 ).execute()
@@ -306,7 +308,7 @@ async def create_comment(request, validated_data: CommentCreateType, slug):
     article = Article.get_or_none(slug=slug)
     if article:
         comment = dict_to_model(
-            Comments,
+            Comment,
             {"body": validated_data.body, "userid": user["id"], "articleid": article},
             ignore_unknown=True,
         )
@@ -327,7 +329,7 @@ async def delete_comment(request, slug, id):
     logger.info("Deleting article with slug {}".format(slug))
     user = request.ctx.user
     article = Article.get_or_none(slug=slug)
-    comment = Comments.get_or_none(id=id)
+    comment = Comment.get_or_none(id=id)
     if not article:
         raise NotFound("Not found", 404)
     if not comment:

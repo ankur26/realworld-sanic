@@ -1,6 +1,6 @@
 from peewee import BlobField, CharField
 
-from .Base import BaseModel
+from .base import BaseModel
 
 
 class User(BaseModel):
@@ -9,6 +9,3 @@ class User(BaseModel):
     email = CharField(unique=True)
     bio = CharField(null=True)
     image = CharField(null=True)
-
-    def __repr__(self) -> str:
-        return f"username-{self.username},email-{self.email}"

@@ -1,9 +1,9 @@
 from peewee import ForeignKeyField
 
-from .Base import BaseModel
-from .User import User
+from .base import BaseModel
+from .user import User
 
 
-class Followers(BaseModel):
+class Follower(BaseModel):
     current = ForeignKeyField(User, field="id")
     following = ForeignKeyField(User, field="id")

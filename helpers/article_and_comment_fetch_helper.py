@@ -10,18 +10,18 @@ from playhouse.shortcuts import model_to_dict
 from sanic import NotFound, SanicException
 from sanic.log import logger
 
-from models.Article import Article
-from models.Comments import Comments
-from models.FavoritedArticlesByUser import FavoritedArticlesByUser
-from models.Followers import Followers
-from models.Tags import Tags
-from models.TagToArticle import TagToArticle
-from models.User import User
+from models.article import Article
+from models.articletag import TagToArticle
+from models.comment import Comment
+from models.follower import Follower
+from models.tag import Tag
+from models.user import User
+from models.userfavorite import FavoritedArticlesByUser
 
 
 async def following(current: int, following: int) -> bool:
     logger.info("following: running for id {} to id {}".format(current, following))
-    return Followers.get_or_none(current=current, following=following) is not None
+    return Follower.get_or_none(current=current, following=following) is not None
 
 
 async def favorited(userid: int, articleid: int) -> bool:
@@ -45,7 +45,7 @@ async def get_tags(articleid):
     logger.info("get_tags: running for {}".format(articleid))
     tags = (
         TagToArticle.select()
-        .join(Tags, on=(Tags.id == TagToArticle.tagid))
+        .join(Tag, on=(Tag.id == TagToArticle.tagid))
         .join(Article, on=(Article.id == TagToArticle.articleid))
         .where(Article.id == articleid)
     )
@@ -58,8 +58,8 @@ async def get_follower_articles(userid, limit, offset):
             limit, userid, offset
         )
     )
-    subquery_user = Followers.select(Followers.following).where(
-        Followers.current == userid
+    subquery_user = Follower.select(Follower.following).where(
+        Follower.current == userid
     )
     query_for_user = (
         Article.select(Article)
@@ -93,7 +93,7 @@ async def get_all_articles(limit, offset, tag, author, favorite):
     )
     subquery = None
     if tag and not author and not favorite:
-        t = Tags.get_or_none(tag=tag)
+        t = Tag.get_or_none(tag=tag)
         if t:
             subquery = TagToArticle.select(TagToArticle.articleid).where(
                 TagToArticle.tagid == t
@@ -215,7 +215,7 @@ async def get_comments(user, article):
     logger.info("get_comments")
     results = [
         model_to_dict(row)
-        for row in Comments.select().where(Comments.articleid == article)
+        for row in Comment.select().where(Comment.articleid == article)
     ]
     for r in results:
         del r["articleid"]
@@ -228,7 +228,7 @@ async def get_comments(user, article):
 
 async def get_single_comment(user, comment):
     logger.info("get_single_comment")
-    comment = model_to_dict(Comments.get_or_none(id=comment))
+    comment = model_to_dict(Comment.get_or_none(id=comment))
     del comment["articleid"]
     comment["author"] = comment["userid"]
     comment["author"]["following"] = (

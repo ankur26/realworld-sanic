@@ -1,7 +1,7 @@
 from peewee import CharField
 
-from .Base import BaseModel
+from .base import BaseModel
 
 
-class Tags(BaseModel):
+class Tag(BaseModel):
     tag = CharField(unique=True)

@@ -4,7 +4,7 @@ from typing import List, Optional
 from pydantic import BaseModel, computed_field
 from slugify import slugify
 
-from .ProfileSerializationSchemas import ProfileSerializer
+from .profile_schema import ProfileSerializer
 
 
 class ArticleCreateType(BaseModel):

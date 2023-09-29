@@ -2,8 +2,8 @@ from datetime import datetime
 
 from peewee import CharField, ForeignKeyField, TextField
 
-from .Base import BaseModel
-from .User import User
+from .base import BaseModel
+from .user import User
 
 
 class Article(BaseModel):

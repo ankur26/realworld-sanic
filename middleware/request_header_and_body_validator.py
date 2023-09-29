@@ -1,6 +1,6 @@
 from functools import wraps
 
-from sanic import BadRequest, Forbidden, SanicException, Unauthorized
+from sanic import BadRequest, SanicException, Unauthorized
 from sanic.log import logger
 
 from helpers.jwt_token_helper import check_token_and_return_status

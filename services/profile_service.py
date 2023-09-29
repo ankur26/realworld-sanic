@@ -3,11 +3,11 @@ from sanic import Blueprint, NotFound, SanicException, json
 from sanic.log import logger
 
 from helpers.serializer_helper import serialize_output
-from middleware.requestvalidator import (authorize,
-                                         validate_authorization_token_exists)
-from models.Followers import Followers
-from models.User import User
-from schemas.ProfileSerializationSchemas import ProfileSerializer
+from middleware.request_header_and_body_validator import (
+    authorize, validate_authorization_token_exists)
+from models.follower import Follower
+from models.user import User
+from schemas.profile_schema import ProfileSerializer
 
 profile_bp = Blueprint("profiles", url_prefix="/profiles")
 
@@ -27,7 +27,7 @@ async def get_profile(request, username):
         logger.info("get_profile:authorized route")
         current_user_id = curr_user.get("id")
         profile_to_lookup["following"] = (
-            Followers.get_or_none(
+            Follower.get_or_none(
                 current=current_user_id, following=profile_to_lookup["id"]
             )
             is not None
@@ -51,11 +51,11 @@ async def follow_user(request, username):
         raise NotFound({"errors": "User or profile to follow not found"}, 404)
     try:
         logger.info("follow_user:profile found, attempting follow")
-        follower = Followers.get_or_none(
+        follower = Follower.get_or_none(
             current=curr_user["id"], following=profile_to_lookup["id"]
         )
         if not follower:
-            Followers(current=curr_user["id"], following=profile_to_lookup["id"]).save()
+            Follower(current=curr_user["id"], following=profile_to_lookup["id"]).save()
         profile_to_lookup["following"] = True
         logger.info("follow_user: returning profile")
         return json(
@@ -76,12 +76,12 @@ async def unfollow_user(request, username):
         profile_to_unfollow_id = User.get_or_none(username=username)
         if profile_to_unfollow_id:
             logger.info("unfollow_user: user profile found")
-            following_id = Followers.get_or_none(
+            following_id = Follower.get_or_none(
                 current=user_id, following=profile_to_unfollow_id.id
             )
             if following_id:
                 logger.info("unfollow_user: profile link found")
-                Followers.delete_by_id(following_id)
+                Follower.delete_by_id(following_id)
             profile_to_lookup = model_to_dict(User.get_by_id(profile_to_unfollow_id))
             profile_to_lookup["following"] = False
             logger.info("returning updated profile")

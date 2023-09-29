@@ -6,7 +6,7 @@ from jwt.exceptions import *
 from playhouse.shortcuts import model_to_dict
 from sanic.log import logger
 
-from models.User import User
+from models.user import User
 
 
 async def get_token(user: dict) -> (bool, str | None):

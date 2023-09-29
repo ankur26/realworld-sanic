@@ -3,11 +3,12 @@ from sanic import Blueprint, Sanic, text
 from sanic.log import logger
 
 from helpers.serializer_helper import serialize_error
-from models import *
-from services.articleandcomment import article_bp
-from services.auth import auth_bp, user_bp
-from services.profile import profile_bp
-from services.tag import tag_bp
+from models import (article, articletag, comment, follower, tag, user,
+                    userfavorite)
+from services.article_comment_service import article_bp
+from services.auth_service import auth_bp, user_bp
+from services.profile_service import profile_bp
+from services.tag_service import tag_bp
 
 
 async def hello(request):
@@ -29,13 +30,13 @@ def create_app():
     logger.info("Creating tables / database structure if it does not exist")
     db.create_tables(
         models=[
-            User.User,
-            Followers.Followers,
-            Article.Article,
-            Comments.Comments,
-            FavoritedArticlesByUser.FavoritedArticlesByUser,
-            Tags.Tags,
-            TagToArticle.TagToArticle,
+            user.User,
+            follower.Follower,
+            article.Article,
+            comment.Comment,
+            userfavorite.FavoritedArticlesByUser,
+            tag.Tag,
+            articletag.TagToArticle,
         ]
     )
     logger.info("Make the api blueprint here")

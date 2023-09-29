@@ -1,8 +1,8 @@
 from peewee import ForeignKeyField
 
-from .Article import Article
-from .Base import BaseModel
-from .User import User
+from .article import Article
+from .base import BaseModel
+from .user import User
 
 
 class FavoritedArticlesByUser(BaseModel):
