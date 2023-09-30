@@ -96,7 +96,6 @@ This is then general folder structure of the application
 - [ ] Unit testing
 - [ ] Containerization using docker
 - [ ] OpenAPI spec
-- [ ] Migration to poetry for package manager and script setup
 
 # Libraries used
 1. [Sanic](sanic.dev/) - asynchronous Python web framework
