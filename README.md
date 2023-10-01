@@ -50,6 +50,8 @@ This is then general folder structure of the application
 ├── server.py (Core server file, has setup and configuration)
 ```
 
+# Requirements
+The application has been tested with version Python 3.10.12, we recommend you install at least 3.10 to best reproduce the results
 # Getting started
 
 1. Clone the repo
