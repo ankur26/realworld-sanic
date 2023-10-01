@@ -89,7 +89,7 @@ This is then general folder structure of the application
     - [x] Get Tags
 
 
-## Additional Features (as mentioned in Sanic's best practices docs and some more generic stuff)
+## Additional Features (more generalized things)
 - [x] Centralized logging using Sanic logger
 - [x] Custom exception handler and logging using Sanic logger and Sanic exception
 - [x] Segregation of services using Sanic Blueprints
