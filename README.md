@@ -60,7 +60,7 @@ This is then general folder structure of the application
     - Linux - using `source .venv/bin/activate`
 
 4. Install the required dependencies using `pip install -r requirements.txt`
-5. Launch the app locally using `sanic server:create_app --dev`(Dev mode) or `sanic server:create_app`(Production mode)
+5. Launch the app locally using `sanic realworld.server:create_app --dev`(Dev mode) or `sanic realworld.server:create_app`(Production mode)
 
 ## Specs tracker
 - Auth
@@ -93,9 +93,9 @@ This is then general folder structure of the application
 - [x] Centralized logging using Sanic logger
 - [x] Custom exception handler and logging using Sanic logger and Sanic exception
 - [x] Segregation of services using Sanic Blueprints
-- [ ] Unit testing
-- [ ] Containerization using docker
-- [ ] OpenAPI spec
+- [x] Unit testing (Currently at 64%, contributions are welcome!)
+- [ ] Containerization using docker (Simple docker file, for local runs - in progress)
+- [ ] OpenAPI spec (in progress)
 
 # Libraries used
 1. [Sanic](sanic.dev/) - asynchronous Python web framework

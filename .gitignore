@@ -5,7 +5,8 @@
 /dist
 /__pycache__
 /.venv
-*/__pycache__/
+*/__pycache__
+/realworld/**/__pycache__/*
 # IDEs and editors
 /.idea
 .project
@@ -35,3 +36,4 @@ yarn-debug.log*
 yarn-error.log*
 
 .coverage
+**.pyc
