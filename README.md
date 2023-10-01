@@ -11,6 +11,7 @@ We've gone to great lengths to adhere to the **Sanic** community styleguides & b
 
 For more information on how to this works with other frontends/backends, head over to the [RealWorld](https://github.com/gothinkster/realworld) repo.
 
+**All contributions are welcome!**
 # How it works
 
 This is then general folder structure of the application
@@ -109,3 +110,5 @@ This is then general folder structure of the application
 3. [Pydantic](https://docs.pydantic.dev/latest/) - Fast and extensible validation library, most used validation library for Python
 4. [Isort](https://pycqa.github.io/isort/index.html) and [Black](https://black.readthedocs.io/en/stable/) for import orders, and linting.
 5. [Bcrpyt](https://pypi.org/project/bcrypt/) for password hashing and [PyJWT](https://pyjwt.readthedocs.io/en/stable/) for authentication.
+
+
