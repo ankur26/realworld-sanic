@@ -61,6 +61,12 @@ This is then general folder structure of the application
 
 4. Install the required dependencies using `pip install -r requirements.txt`
 5. Launch the app locally using `sanic realworld.server:create_app --dev`(Dev mode) or `sanic realworld.server:create_app`(Production mode)
+    1. To run unit tests using the API test script
+        1. Install newman using [npm](https://www.npmjs.com/) (Requires [NodeJS](https://nodejs.org/en))
+        2. In the project's root directory, run the test using `APIURL=http://localhost:8000/api ./run-api-tests.sh`
+    2. To run the tests using pytest run `pytest tests/`
+        1. For the verbose option use `pytest --verbose tests/`
+        2. To see the code coverage use `pytest --cov=realworld/ tests/` (You can combine these two options)
 
 ## Specs tracker
 - Auth
