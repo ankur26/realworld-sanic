@@ -31,6 +31,7 @@ def test_follow(profile_test_client):
     assert check_object("profile", profile_keys, response=response.json) == True
     assert response.json.get("profile").get("following") == True
 
+
 def test_unfollow(profile_test_client):
     request, response = profile_test_client.post(
         "/api/users/login", json=user_for_profile_1

@@ -8,11 +8,13 @@ from ..helpers.jwt_token_helper import get_token
 from ..helpers.serializer_helper import merge_objects, serialize_output
 from ..middleware.request_content_validator import validate_data
 from ..middleware.request_header_and_body_validator import (
-    authorize, validate_authorization_token_exists,
-    validate_request_body_exists, validate_request_object_exists_in_body)
+    authorize,
+    validate_authorization_token_exists,
+    validate_request_body_exists,
+    validate_request_object_exists_in_body,
+)
 from ..models.user import User
-from ..schemas.user_schema import (UserLogin, UserOutput, UserRegistration,
-                                   UserUpdate)
+from ..schemas.user_schema import UserLogin, UserOutput, UserRegistration, UserUpdate
 
 auth_bp = Blueprint("auth", url_prefix="/users")
 user_bp = Blueprint("user", url_prefix="/user")

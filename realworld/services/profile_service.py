@@ -4,7 +4,9 @@ from sanic.log import logger
 
 from ..helpers.serializer_helper import serialize_output
 from ..middleware.request_header_and_body_validator import (
-    authorize, validate_authorization_token_exists)
+    authorize,
+    validate_authorization_token_exists,
+)
 from ..models.follower import Follower
 from ..models.user import User
 from ..schemas.profile_schema import ProfileSerializer

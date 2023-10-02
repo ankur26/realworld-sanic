@@ -4,24 +4,36 @@ from sanic import Blueprint, Forbidden, NotFound, SanicException, json
 from sanic.log import logger
 
 from ..helpers.article_and_comment_fetch_helper import (
-    get_articles_from_helper, get_comments, get_single_article,
-    get_single_comment)
-from ..helpers.serializer_helper import (get_query_items, merge_objects,
-                                         serialize_multiple, serialize_output)
+    get_articles_from_helper,
+    get_comments,
+    get_single_article,
+    get_single_comment,
+)
+from ..helpers.serializer_helper import (
+    get_query_items,
+    merge_objects,
+    serialize_multiple,
+    serialize_output,
+)
 from ..middleware.request_content_validator import validate_data
 from ..middleware.request_header_and_body_validator import (
-    authorize, validate_authorization_token_exists,
-    validate_request_body_exists, validate_request_object_exists_in_body)
+    authorize,
+    validate_authorization_token_exists,
+    validate_request_body_exists,
+    validate_request_object_exists_in_body,
+)
 from ..models.article import Article
 from ..models.articletag import TagToArticle
 from ..models.comment import Comment
 from ..models.tag import Tag
 from ..models.userfavorite import FavoritedArticlesByUser
-from ..schemas.article_comment_schema import (ArticleCreateType,
-                                              ArticleOutputType,
-                                              ArticleUpdateType,
-                                              CommentCreateType,
-                                              CommentOutputType)
+from ..schemas.article_comment_schema import (
+    ArticleCreateType,
+    ArticleOutputType,
+    ArticleUpdateType,
+    CommentCreateType,
+    CommentOutputType,
+)
 
 article_bp = Blueprint("article", url_prefix="/articles")
 
@@ -49,7 +61,11 @@ async def create_article(request, validated_data: ArticleCreateType):
             for t in taglist:
                 tag_cursor, status = Tag.get_or_create(tag=t)
                 # We now have the article ID and the tag ID at this point, now just add this entry to the tagToarticletable
-                logger.info("Registering tag {} for article {}".format(tag_cursor.get_id(),article_cursor.get_id()))
+                logger.info(
+                    "Registering tag {} for article {}".format(
+                        tag_cursor.get_id(), article_cursor.get_id()
+                    )
+                )
                 tag_to_article_id = TagToArticle(
                     articleid=article_cursor.get_id(), tagid=tag_cursor.get_id()
                 ).save()

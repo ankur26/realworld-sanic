@@ -5,8 +5,7 @@ from sanic import Blueprint, Sanic, text
 from sanic.log import logger
 
 from .helpers.serializer_helper import serialize_error
-from .models import (article, articletag, comment, follower, tag, user,
-                     userfavorite)
+from .models import article, articletag, comment, follower, tag, user, userfavorite
 from .services.article_comment_service import article_bp
 from .services.auth_service import auth_bp, user_bp
 from .services.profile_service import profile_bp
