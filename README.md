@@ -102,7 +102,7 @@ The application has been tested with version Python 3.10.12, we recommend you in
 - [x] Centralized logging using Sanic logger
 - [x] Custom exception handler and logging using Sanic logger and Sanic exception
 - [x] Segregation of services using Sanic Blueprints
-- [x] Unit testing (Currently at 64%, contributions are welcome!)
+- [x] Unit testing (Currently at 80%, contributions are welcome!)
 - [ ] Containerization using docker (Simple docker file, for local runs - in progress)
 - ~~[ ] OpenAPI spec~~
 
