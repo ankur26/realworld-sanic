@@ -104,7 +104,7 @@ The application has been tested with version Python 3.10.12, we recommend you in
 - [x] Segregation of services using Sanic Blueprints
 - [x] Unit testing (Currently at 64%, contributions are welcome!)
 - [ ] Containerization using docker (Simple docker file, for local runs - in progress)
-``- [ ] OpenAPI spec``
+~~- [ ] OpenAPI spec~~
 
 # Libraries used
 1. [Sanic](sanic.dev/) - asynchronous Python web framework
@@ -112,5 +112,6 @@ The application has been tested with version Python 3.10.12, we recommend you in
 3. [Pydantic](https://docs.pydantic.dev/latest/) - Fast and extensible validation library, most used validation library for Python
 4. [Isort](https://pycqa.github.io/isort/index.html) and [Black](https://black.readthedocs.io/en/stable/) for import orders, and linting.
 5. [Bcrpyt](https://pypi.org/project/bcrypt/) for password hashing and [PyJWT](https://pyjwt.readthedocs.io/en/stable/) for authentication.
+6. [Pytest](https://docs.pytest.org/en/6.2.x/contents.html) for testing and [pytest-cov](https://pytest-cov.readthedocs.io/en/latest/) for code coverage.
 
 
