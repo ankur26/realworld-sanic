@@ -116,7 +116,6 @@ Prequisites : Docker pre-installed.
 - [x] Segregation of services using Sanic Blueprints
 - [x] Unit testing (Currently at 80%, contributions are welcome!)
 - [x] Containerization using docker (Simple docker file, for local runs)
-- [ ] ~~ OpenAPI spec~~
 
 # Libraries used
 1. [Sanic](sanic.dev/) - asynchronous Python web framework
