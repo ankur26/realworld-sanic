@@ -16,7 +16,7 @@ async def hello(request):
     return text("Welcome to app")
 
 
-def create_app(test=False):
+def create_app(namespace,test=False):
     # Initialize the app
     db_models = [
         user.User,
@@ -34,18 +34,19 @@ def create_app(test=False):
 
     logger.info("Adding Baseline route just to test a ping")
     app.add_route(hello, "/")
+    logger.info("test = {}".format(test))
 
     logger.info(" Initialize the database in {}".format(getcwd()))
     db = (
         SqliteDatabase(path.join(getcwd(), "conduit.db"))
-        if not test
+        if not (test or namespace.dev)
         else SqliteDatabase(":memory:")
     )
     logger.info("Binding models to database")
     db.bind(db_models)
     logger.info("Database created in {}".format("conduit.db" if not test else "memory"))
-    if test:
-        logger.info("Dropping previous context for tests")
+    if test or namespace.dev:
+        logger.info("Dropping previous context for tests or in development mode.")
         db.drop_tables(db_models)
     logger.info("Creating tables / database structure if it does not exist")
     db.create_tables(models=db_models)

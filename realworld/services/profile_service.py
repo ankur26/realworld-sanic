@@ -13,7 +13,6 @@ from ..schemas.profile_schema import ProfileSerializer
 
 profile_bp = Blueprint("profiles", url_prefix="/profiles")
 
-
 @profile_bp.get("/<username:str>", name="get_profile")
 @validate_authorization_token_exists(allow_anonymous=True)
 @authorize()

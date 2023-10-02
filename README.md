@@ -54,6 +54,8 @@ This is then general folder structure of the application
 The application has been tested with version Python 3.10.12, we recommend you install at least 3.10 to best reproduce the results
 # Getting started
 
+## Using Python
+
 1. Clone the repo
 2. Create a virtual environment using venv, virtualenv inside the repo directory
 > python -m venv .venv
@@ -70,6 +72,16 @@ The application has been tested with version Python 3.10.12, we recommend you in
     2. To run the tests using pytest run `pytest tests/`
         1. For the verbose option use `pytest --verbose tests/`
         2. To see the code coverage use `pytest --cov=realworld/ tests/` (You can combine these two options)
+
+## Using docker
+Prequisites : Docker pre-installed.
+1. Clone the repo
+2. Run `[sudo] docker compose build` (Default mode in development, prod docker file exists but reference is not meant for production use)
+    1. To run the docker file with sanic in prod mode, copy the contents of Dockerfile.prod to Dockerfile and run command in step 2.
+    2. To run the docker file with sanic in dev mode, copy the contents of Dockerfile.dev to Dockerfile and run command in step 2. ( Dev mode creates an in memory database rather than an SQlite db so better to run the API test script.)
+3. Run `[sudo] docker compose up -d` to run the application
+4. Run `[sudo] docker compose down` to stop the application
+
 
 ## Specs tracker
 - Auth
@@ -103,7 +115,7 @@ The application has been tested with version Python 3.10.12, we recommend you in
 - [x] Custom exception handler and logging using Sanic logger and Sanic exception
 - [x] Segregation of services using Sanic Blueprints
 - [x] Unit testing (Currently at 80%, contributions are welcome!)
-- [ ] Containerization using docker (Simple docker file, for local runs - in progress)
+- [x] Containerization using docker (Simple docker file, for local runs)
 - [ ] ~~ OpenAPI spec~~
 
 # Libraries used
@@ -115,3 +127,4 @@ The application has been tested with version Python 3.10.12, we recommend you in
 6. [Pytest](https://docs.pytest.org/en/6.2.x/contents.html) for testing and [pytest-cov](https://pytest-cov.readthedocs.io/en/latest/) for code coverage.
 
 
+### Note: This is not meant to be used in a production environment!

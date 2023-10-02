@@ -125,19 +125,24 @@ async def get_all_articles(limit, offset, tag, author, favorite):
     res = []
 
     if subquery is not None:
+        logger.info(
+        "We have total {} articles and filtered {} articles".format(
+            Article.select().count(), subquery.count()
+        )
+        )
         if subquery.count() == 0:
             return []
         else:
             query = Article.select().where(Article.id.in_(subquery))
     else:
+        logger.info(
+        "We have total {} articles".format(
+            Article.select().count()
+        )
+        )
         query = Article.select()
 
     counts_for_articles = query.count()
-    logger.info(
-        "We have total {} articles and filtered {} articles".format(
-            Article.select().count(), subquery.count()
-        )
-    )
     if counts_for_articles < lower:
         res = [model_to_dict(row) for row in query.paginate(1, counts_for_articles)]
     elif lower <= counts_for_articles <= higher:
