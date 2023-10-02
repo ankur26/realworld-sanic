@@ -74,7 +74,7 @@ async def get_user(request):
 async def login(request, validated_data: UserLogin):
     logger.info("login")
     user = User.get_or_none(email=validated_data.email)
-    logger.info(validated_data)
+    # logger.info(validated_data)
     logger.info(user)
     if user:
         user = model_to_dict(user)
@@ -91,7 +91,7 @@ async def login(request, validated_data: UserLogin):
                     "Something went wrong during token generation", 500
                 )
         else:
-            raise Forbidden("Password does not match", 403)
+            raise Forbidden("Password does not match")
     else:
         raise SanicException("username does not exist", 422)
 

@@ -89,7 +89,7 @@ async def get_all_articles(limit, offset, tag, author, favorite):
     # query building sequence starts
     # Not sure if this is the right assumption but we're going to assume that all inputs can arrive at the same time
     logger.info(
-        "get_all_articles: fetching articles with linit {} offset {} tag {} author {} favorite {}"
+        "get_all_articles: fetching articles with linit {} offset {} tag {} author {} favorite {}".format(limit, offset, tag, author, favorite)
     )
     subquery = None
     if tag and not author and not favorite:
@@ -131,6 +131,7 @@ async def get_all_articles(limit, offset, tag, author, favorite):
         query = Article.select()
 
     counts_for_articles = query.count()
+    logger.info("We have total {} articles and filtered {} articles".format(Article.select().count(),subquery.count()))
     if counts_for_articles < lower:
         res = [model_to_dict(row) for row in query.paginate(1, counts_for_articles)]
     elif lower <= counts_for_articles <= higher:
@@ -201,7 +202,7 @@ async def get_single_article(user, article_id=None, article_slug=None):
                 else Article.select().where(Article.slug == article_slug)
             )
             if article_query.count() == 0:
-                raise NotFound("The slug or ID does not exist", 404)
+                raise NotFound("The slug or ID does not exist")
         except IntegrityError as ie:
             raise SanicException(
                 f"There has been an an internal server error {ie}", 500

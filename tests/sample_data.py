@@ -1,5 +1,5 @@
 # This is all the sample data that we would need to run the tests
-
+from slugify import slugify
 
 create_users = [
     {
@@ -30,7 +30,7 @@ user_for_profile_2_registration = {
     "user": {
         "username": "Ankur",
         "email": "ankur@ankur.ankur",
-        "password": "ankurnakur",
+        "password": "ankurankur",
     }
 }
 
@@ -51,9 +51,12 @@ article_2 = {
     }
 }
 
-update_article = {"article": {"title": "Did you train your dragon?"}}
+update_article = {"article": {"title": "Did you train your dragon"}}
 
 comment_1 = {"comment": {"body": "It takes a Jacobian"}}
 
 
 comment_2 = {"comment": {"body": "I like Sanic"}}
+
+slug1 = slugify(article_1["article"]["title"])
+slug2 = slugify(article_2["article"]["title"])

@@ -42,25 +42,25 @@ async def create_article(request, validated_data: ArticleCreateType):
         # We need to create and article first, the tags then can be associated with
         # Whose ID can be then be passed for us to create tags.
         logger.info("create_article:saving article")
-        article_id = article_cursor.save()
-        if article_id:
+        article_created = article_cursor.save()
+        if article_created:
             logger.info("create_article: creating or updating tag relations")
             taglist = validated_data["tagList"]
             for t in taglist:
                 tag_cursor, status = Tag.get_or_create(tag=t)
                 # We now have the article ID and the tag ID at this point, now just add this entry to the tagToarticletable
-                if status:
-                    tag_to_article_id = TagToArticle(
-                        articleid=article_id, tagid=tag_cursor.get_id()
-                    ).save()
-                    if not tag_to_article_id:
-                        raise SanicException(
-                            "Some error happened while attaching a tag to an article",
-                            500,
-                        )
+                logger.info("Registering tag {} for article {}".format(tag_cursor.get_id(),article_cursor.get_id()))
+                tag_to_article_id = TagToArticle(
+                    articleid=article_cursor.get_id(), tagid=tag_cursor.get_id()
+                ).save()
+                if not tag_to_article_id:
+                    raise SanicException(
+                        "Some error happened while attaching a tag to an article",
+                        500,
+                    )
             logger.info("create_article: getting final readied article")
             article_output = await get_single_article(
-                user=current_user, article_id=article_id
+                user=current_user, article_id=article_cursor.get_id()
             )
             logger.info("create_article: returning readied article")
 
@@ -163,7 +163,7 @@ async def toggle_favorite(request, slug):
                 )
             )
     else:
-        raise NotFound("Slug not found not found", 404)
+        raise NotFound("Slug not found not found")
 
 
 @article_bp.put("/<slug:str>", name="update_article")
@@ -246,7 +246,7 @@ async def delete_article(request, slug):
         else None
     )
     if not article:
-        raise SanicException("Not found", 404)
+        raise NotFound("Not found")
     else:
         # We have the article id here we should now go ahead and delete in three tables
         # TagsToArticle
@@ -255,7 +255,7 @@ async def delete_article(request, slug):
         # Then the article itself
         # There are Cascade options but in the ORM but I have disabled those for simplicity
         if user["id"] != article["author"]["id"]:
-            return SanicException("Forbidden", 403)
+            raise Forbidden("Forbidden")
         else:
             try:
                 TagToArticle.delete().where(
@@ -318,7 +318,7 @@ async def create_comment(request, validated_data: CommentCreateType, slug):
             )
         )
     else:
-        raise NotFound("Not found", 404)
+        raise NotFound("Not found")
 
 
 @article_bp.delete("<slug:str>/comments/<id:int>", name="delete_comment")
@@ -330,12 +330,12 @@ async def delete_comment(request, slug, id):
     article = Article.get_or_none(slug=slug)
     comment = Comment.get_or_none(id=id)
     if not article:
-        raise NotFound("Not found", 404)
+        raise NotFound("Not found")
     if not comment:
-        raise NotFound("Not found", 404)
+        raise NotFound("Not found")
     comment_object = model_to_dict(comment)
     if user["id"] != comment_object["userid"]["id"]:
-        raise Forbidden("Forbidden", 403)
+        raise Forbidden("Forbidden")
     try:
         comment.delete()
         return json({"status": "success"})
