@@ -104,7 +104,7 @@ The application has been tested with version Python 3.10.12, we recommend you in
 - [x] Segregation of services using Sanic Blueprints
 - [x] Unit testing (Currently at 64%, contributions are welcome!)
 - [ ] Containerization using docker (Simple docker file, for local runs - in progress)
-~~- [ ] OpenAPI spec~~
+- ~~[ ] OpenAPI spec~~
 
 # Libraries used
 1. [Sanic](sanic.dev/) - asynchronous Python web framework
